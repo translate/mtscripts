@@ -25,7 +25,7 @@ def create_option_parser():
 	"""Creates command-line option parser for when this script is used on the
 		command-line. Run "corpus_collect.py -h" for help regarding options."""
 	from optparse import OptionParser
-	usage='Usage: %prog [<options>] <po directory>'
+	usage='Usage: %prog [<options>] <po directory> <output dir>'
 	parser = OptionParser(usage=usage)
 	
 	return parser
