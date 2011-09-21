@@ -25,7 +25,6 @@ from gettext   import gettext as _
 import re
 import random
 import codecs
-import cleaner
 
 #TODO: decide what to do with single quotes, since they sometimes appear as part of a word
 punct = re.compile(u'([.]|,|\?|!|:|;|\'|"|“|”|‘|’|—|\)|\()') #might need expanding
@@ -34,14 +33,17 @@ spaces = re.compile('\s+') #reduces any amount of successive whitespace to one s
 
 def write_corpusfiles(corpusname, lang1=u"", lang2=u"", enc='utf-8', lunits=[], clean=False, outdir=None):
     
+    print len(lunits)
+    
     if not os.path.exists(outdir):
         os.mkdir(outdir)
     s = codecs.open(os.path.join(outdir,corpusname + u"." + lang1), 'w', enc)
     t = codecs.open(os.path.join(outdir,corpusname + u"." + lang2), 'w', enc)
-    random.shuffle(lunits)
+    #random.shuffle(lunits)
     
     for u in lunits:
         if clean:
+            import cleaner
             if u.istranslated():
                 srcstr = fix_punct(cleaner.cleanup(u.source)) 
                 tgtstr = fix_punct(cleaner.cleanup(u.target))
@@ -78,26 +80,13 @@ def create_option_parser():
         '-o', '--output-dir',
         dest='outputdir',
         help=_('Output directory to use. Default: location of input file.'),
-        default=None
-    )
-    parser.add_option(
-        '-s', '--segmented-output-dir',
-        dest='segoutdir',
-        help=_('Output directory to use for segmented files.'),
-        default='segmented'
+        default='output'
     )
     parser.add_option(
         '-c', '--clean',
         dest='usecleaner',
         action='store_true',
         help=_('Use the cleaner designed for our specific Zulu-Xhosa corpus.'),
-        default=False
-    )
-    parser.add_option(
-        '--skip-po-segmentation',
-        dest='skipsegment',
-        action='store_true',
-        help=_('Skip segmentation of PO files.'),
         default=False
     )
     return parser
@@ -109,8 +98,6 @@ if __name__ == "__main__":
     
     outdir = options.outputdir
     usecleaner = options.usecleaner
-    skipsegment = options.skipsegment
-    segoutdir = options.segoutdir
     
     if len(args) == 3:
         filepath = args[0]
@@ -124,16 +111,9 @@ if __name__ == "__main__":
         outdir = os.path.split(filepath)[0]
     
     filename = os.path.split(filepath)[1]
-    print "Converting", filename
+    #print "Converting", filename
     
-    if filename.endswith('.po') and not skipsegment:
-        if not os.path.exists(segoutdir):
-            os.mkdir(segoutdir)
-        outfile = os.path.join(segoutdir,filename)
-        result = posegment.segmentfile(filepath,file(outfile,'w'),None)
-        corpus = factory.getobject(outfile)
-    else:
-        corpus = factory.getobject(filename)
+    corpus = factory.getobject(filepath)
     
     import locale
     enc = locale.getpreferredencoding()
