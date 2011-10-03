@@ -4,46 +4,71 @@
 
 pushd .
 
+translations=false
+alignment=false
+
+if [ "$1" = "t" ]; then
+	translations=true
+	if [ "$2" = "a" ]; then
+		alignment=true
+	fi
+else echo 'USAGE: ./do_everything_ssh-version.sh [t] [a]'; exit
+fi
+
+if [ "$1" = "a" ]; then
+	alignment=true
+fi
+
 langtag1='zu'
 langtag2='xh'
 corpusname='corpus'
 datadir='data'
 mosesdir='moses'
 #podir='po-files'
-alltransdir='po-translations'
-allaligndir='po-alignments'
+transdir='po-translations'
+aligndir='po-alignments'
 segtransdir='seg-translations'
-
 
 mkdir $datadir
 cd $datadir
 #mkdir $podir
-mkdir $alltransdir
+mkdir $transdir
 mkdir $segtransdir
-mkdir $allaligndir
+mkdir $aligndir
 cd ..
 
 server='indlovu.local'
-servpath='/var/samba/public/mt-work'
+transservpath='/var/samba/public/mt-work/translations'
+alignservpath='/var/samba/public/mt-work/alignment'
+servdir='4.reviewed'
 locpath='/home/laurette/Translate_org_za/trunk/mtscripts'
-transdir='translations'
-aligndir='alignment'
 
-ssh $server "cd $servpath/$transdir; sh copy_po.sh 4.reviewed $alltransdir"
-scp $server:$servpath/$transdir/$alltransdir/* $locpath/$datadir/$alltransdir
-ssh $server "cd $servpath/$aligndir; sh copy_po.sh 4.reviewed $allaligndir"
-scp $server:$servpath/$aligndir/$allaligndir/* '/home/laurette/Translate_org_za/trunk/mtscripts/'$datadir/$allaligndir
+if $translations ; then
+	echo 'Downloading translations'
+	sh download.sh $server $transservpath $servdir $locpath $transdir $datadir
+fi
+
+if $alignment ; then
+	echo 'Downloading alignment'
+	sh download.sh $server $alignservpath $servdir $locpath $aligndir $datadir
+fi
+
+echo $(pwd)
 
 #segment_po.py to segment translations
 
-python segment_po.py $datadir/$alltransdir $datadir/$segtransdir
+if $translations ; then
+	python segment_po.py $datadir/$transdir $datadir/$segtransdir
+	echo 'Performing pocount: translations'
+	pocount $datadir/$segtransdir/* | tail -n 9 > pocount_translations
+fi
 
 #pocounts for alignment and translations
 
-echo 'Performing pocount: translations'
-pocount $datadir/$segtransdir/* | tail -n 9 > pocount_translations
-echo 'Performing pocount: alignment'
-pocount $datadir/$allaligndir/* | tail -n 9 > pocount_alignment
+if $alignment ; then
+	echo 'Performing pocount: alignment'
+	pocount $datadir/$aligndir/* | tail -n 9 > pocount_alignment
+fi
 
 mkdir $mosesdir
 cd $mosesdir
@@ -53,8 +78,12 @@ mkdir corpus
 cd ..
 
 echo "Copying all .po files into $mosesdir/pofiles"
-cp $datadir/$segtransdir/* $mosesdir/pofiles
-cp $datadir/$allaligndir/* $mosesdir/pofiles
+if $translations ; then
+	cp $datadir/$segtransdir/* $mosesdir/pofiles
+fi
+if $alignment ; then
+	cp $datadir/$aligndir/* $mosesdir/pofiles
+fi
 
 echo 'Converting .po files to moses format...'
 #make individual moses format files, then concatenate

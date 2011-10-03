@@ -4,10 +4,10 @@
 pushd .
 
 mosespath='/home/laurette/Translate_org_za/Moses'
-workdir=work_3Oct
-datadir=data_3Oct
+workdir=work_3Oct_t
+datadir=data_3Oct_t
 corpuspath='/home/laurette/Translate_org_za/trunk/mtscripts/moses/corpus'
-corpusname=corpus
+corpusname=tcorpus
 tunetag=tune_
 tunecorpus=$tunetag$(echo $corpusname)
 testtag=test_
