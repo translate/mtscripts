@@ -39,11 +39,10 @@ def write_corpusfiles(corpusname, lang1=u"", lang2=u"", enc='utf-8', lunits=[], 
         os.mkdir(outdir)
     s = codecs.open(os.path.join(outdir,corpusname + u"." + lang1), 'w', enc)
     t = codecs.open(os.path.join(outdir,corpusname + u"." + lang2), 'w', enc)
-    #random.shuffle(lunits)
+    random.shuffle(lunits)
     
     for u in lunits:
         if clean:
-            #print "cleaning yes"
             import cleaner
             if u.istranslated():
                 srcstr = fix_punct(cleaner.cleanup(u.source)) 

@@ -21,19 +21,32 @@
 import random
 import os.path
 
-def divide(argv):
-	corpuspath = argv[1]
+def divide(args, tune, eval):
+	corpuspath = args[0]
 	corpusdir, filename = os.path.split(corpuspath)
 	lines = file(corpuspath).readlines()
+	tune_set = []
+	test_set = []
 	
-	f = open(os.path.join(corpusdir,"tune_"+filename), 'w')
-	f = open(os.path.join(corpusdir,"test_"+filename), 'w')
-	f = open(os.path.join(corpusdir,"train_"+filename), 'w')
+	t = float(tune)
+	e = float(eval)
 	
-	t = 100
-	num = len(lines) - t
+	if t > 0 and t <= 1:
+		#create/clear tuning file
+		f = open(os.path.join(corpusdir,"tune_"+filename), 'w')
+		tune_set = lines[:int(len(lines)*t)]
 	
-	tune_set, test_set, train_set = lines[:t], lines[t:int(num*0.1)+t], lines[int(num*0.1)+t:]
+	if e > 0 and e <= 1:
+		#create/clear testing file
+		f = open(os.path.join(corpusdir,"test_"+filename), 'w')
+		test_set = lines[int(len(lines)*t):int(len(lines)*t)+int(len(lines)*e)]
+	
+	f = open(os.path.join(corpusdir,"complete_"+filename), 'w')
+	
+	train_set = lines[int(len(lines)*t)+int(len(lines)*e):]
+	
+	for l in lines:
+		file(os.path.join(corpusdir,"complete_"+filename),'a').write(l)
 	
 	for l in tune_set:
 		file(os.path.join(corpusdir,"tune_"+filename),'a').write(l)
@@ -41,10 +54,36 @@ def divide(argv):
 	for l in test_set:
 		file(os.path.join(corpusdir,"test_"+filename),'a').write(l)
 	
+	f = open(os.path.join(corpusdir,filename), 'w')
 	for l in train_set:
-		file(os.path.join(corpusdir,"train_"+filename),'a').write(l)
-	
+		file(os.path.join(corpusdir,filename),'a').write(l)
+
+def create_option_parser():
+    """Creates command-line option parser for when this script is used on the
+        command-line. Run "corpus_collect.py -h" for help regarding options."""
+    from optparse import OptionParser
+    usage='Usage: %prog [<options>] <bilingual file> <language tag 1> <language tag 2>'
+    parser = OptionParser(usage=usage)
+
+    parser.add_option(
+        '-u', '--create-tuning',
+        dest='tuning',
+        help='Specify percentage of corpus to be used for tuning corpus.',
+        default=0
+    )
+    parser.add_option(
+        '-e', '--create-evaluation',
+        dest='eval',
+        help='Specify percentage of corpus to be used for tuning corpus.',
+        default=0
+    )
+    return parser
 
 if __name__ == "__main__":
-	from sys import argv
-	divide(argv)
+	
+	options, args = create_option_parser().parse_args()
+	if len(args) >= 1:
+		divide(args, options.tuning, options.eval)
+	else:
+		print "Usage: %prog [<options>] <corpus file>"
+	
