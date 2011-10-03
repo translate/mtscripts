@@ -50,7 +50,7 @@ tuplist.append((re.compile('\|'), 'sub', '\n'))   #replaces other pipes with new
 tuplist.append((re.compile('>>'), 'sub', '\n'))
 tuplist.append((re.compile('^\s*\[.*\]\s*$'), 'del', '')) #marks units starting and ending with square brackets
 tuplist.append((re.compile('\[.*?\]'), 'sub', '')) #removes anything between square brackets
-tuplist.append((re.compile('^\s*[0-9]+[.)]*'), 'sub','')) #removes numbers at beginning of line
+tuplist.append((re.compile('^\s*[0-9]+[.) ]*'), 'sub','')) #removes numbers at beginning of line
 #consider removing numbers *between* sentences?
 tuplist.append((re.compile('[(]\s*[0-9]+(,\s*[0-9]+)*\s*[)]'),'sub','')) #removes comma seperated numbers in round brackets
 tuplist.append((re.compile('--|--'),'sub',' '))

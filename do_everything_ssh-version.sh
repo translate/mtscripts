@@ -13,6 +13,8 @@ mosesdir='moses'
 alltransdir='po-translations'
 allaligndir='po-alignments'
 segtransdir='seg-translations'
+
+
 mkdir $datadir
 cd $datadir
 #mkdir $podir
@@ -21,18 +23,16 @@ mkdir $segtransdir
 mkdir $allaligndir
 cd ..
 
-indpath='/var/samba/public/mt-work'
+server='indlovu.local'
+servpath='/var/samba/public/mt-work'
 locpath='/home/laurette/Translate_org_za/trunk/mtscripts'
 transdir='translations'
 aligndir='alignment'
 
-#echo $alltransdir
-#scp -f copy_po.sh indlovu.local:$indpath/$transdir
-#scp -f copy_po.sh indlovu.local:$indpath/$aligndir
-ssh indlovu.local "cd $indpath/$transdir; sh copy_po.sh 4.reviewed $alltransdir"
-scp indlovu.local:$indpath/$transdir/$alltransdir/* $locpath/$datadir/$alltransdir
-ssh indlovu.local "cd $indpath/$aligndir; sh copy_po.sh 4.reviewed $allaligndir"
-scp indlovu.local:$indpath/$aligndir/$allaligndir/* '/home/laurette/Translate_org_za/trunk/mtscripts/'$datadir/$allaligndir
+ssh $server "cd $servpath/$transdir; sh copy_po.sh 4.reviewed $alltransdir"
+scp $server:$servpath/$transdir/$alltransdir/* $locpath/$datadir/$alltransdir
+ssh $server "cd $servpath/$aligndir; sh copy_po.sh 4.reviewed $allaligndir"
+scp $server:$servpath/$aligndir/$allaligndir/* '/home/laurette/Translate_org_za/trunk/mtscripts/'$datadir/$allaligndir
 
 #segment_po.py to segment translations
 
@@ -49,6 +49,7 @@ mkdir $mosesdir
 cd $mosesdir
 mkdir pofiles
 mkdir mosesformat
+mkdir corpus
 cd ..
 
 echo "Copying all .po files into $mosesdir/pofiles"
@@ -57,15 +58,12 @@ cp $datadir/$allaligndir/* $mosesdir/pofiles
 
 echo 'Converting .po files to moses format...'
 #make individual moses format files, then concatenate
-for d in $(cd $mosesdir; ls)
-do
-	echo $d
-	python units_to_moses.py -o $mosesdir/mosesformat $d $langtag1 $langtag2
-done
 
-echo 'Catenating all moses format files'
+python units_to_moses.py -c -n $corpusname -o $mosesdir/mosesformat $langtag1 $langtag2 $(ls $mosesdir/pofiles/*.po)
+
 cd $mosesdir/mosesformat
-cat $(ls *.$langtag1) > ../$corpusname.$langtag1
-cat $(ls *.$langtag2) > ../$corpusname.$langtag2
+echo 'Catenating all moses format files'
+cat $(ls *.$langtag1) > ../corpus/$corpusname.$langtag1
+cat $(ls *.$langtag2) > ../corpus/$corpusname.$langtag2
 
 popd

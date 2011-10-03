@@ -43,6 +43,7 @@ def write_corpusfiles(corpusname, lang1=u"", lang2=u"", enc='utf-8', lunits=[], 
     
     for u in lunits:
         if clean:
+            #print "cleaning yes"
             import cleaner
             if u.istranslated():
                 srcstr = fix_punct(cleaner.cleanup(u.source)) 
@@ -89,6 +90,12 @@ def create_option_parser():
         help=_('Use the cleaner designed for our specific Zulu-Xhosa corpus.'),
         default=False
     )
+    parser.add_option(
+        '-n', '--corpus_name',
+        dest='corpusname',
+        help=_('Specify corpus name.'),
+        default='corpus'
+    )
     return parser
 
 if __name__ == "__main__":
@@ -96,27 +103,43 @@ if __name__ == "__main__":
     
     options, args = create_option_parser().parse_args()
     
+    corpusname = options.corpusname
     outdir = options.outputdir
     usecleaner = options.usecleaner
     
-    if len(args) == 3:
-        filepath = args[0]
-        lang1 = args[1]
-        lang2 = args[2]
+    if len(args) >= 2:
+        lang1 = args[0]
+        lang2 = args[1]
+        files = []
+        for f in args[2:]:
+            if os.path.exists(f):
+                if os.path.isdir(f):
+                    for fn in os.listdir(f):
+                        if fn.endswith('.txt') and not os.path.isdir(fn):
+                            files.append(os.path.join(f, fn))
+                else:
+                    files.append(f)
+
+        if not files:
+            print 'No input files specified.'
+            exit(1)
+        
     else:
-        print "Usage: %prog [<options>] <bilingual file> <language 1> <language 2>"
+        print "Usage: %prog [<options>] <language 1> <language 2> <bilingual files>"
         exit()
     
-    if not outdir:
-        outdir = os.path.split(filepath)[0]
+    #if not outdir:
+    #    outdir = os.path.split(filepath)[0]
     
-    filename = os.path.split(filepath)[1]
+    #filename = os.path.split(filepath)[1]
     #print "Converting", filename
     
-    corpus = factory.getobject(filepath)
+    units = []
+    for f in files:
+        corpus = factory.getobject(f)
+        units.extend(corpus.units)
     
     import locale
     enc = locale.getpreferredencoding()
-    corpusname = filename[:filename.rfind(u".")]
     
-    write_corpusfiles(corpusname, lang1, lang2, enc, corpus.units, outdir=outdir)
+    write_corpusfiles(corpusname, lang1, lang2, enc, units, clean=usecleaner, outdir=outdir) #
