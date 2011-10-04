@@ -43,8 +43,6 @@ if __name__ == "__main__":
 		print "Usage: %prog [<options>] <po directory> <output dir>"
 		exit()
 	
-	#if not outdir:
-	#	outdir = os.join(os.path.split(filepath)[0],"output")
 	import locale
 	enc = locale.getpreferredencoding()
 	

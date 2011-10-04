@@ -127,15 +127,13 @@ if __name__ == "__main__":
         print "Usage: %prog [<options>] <language 1> <language 2> <bilingual files>"
         exit()
     
-    #if not outdir:
-    #    outdir = os.path.split(filepath)[0]
-    
-    #filename = os.path.split(filepath)[1]
-    #print "Converting", filename
-    
     units = []
     for f in files:
-        corpus = factory.getobject(f)
+        try:
+            corpus = factory.getobject(f)
+        except ValueError:
+            print "Could not convert to factory."
+            continue
         units.extend(corpus.units)
     
     import locale
