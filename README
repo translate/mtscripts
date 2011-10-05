@@ -1,1 +1,32 @@
-Will soon contain useful information.
+This folder contains scripts for converting data into a 
+Moses corpus and for building a Moses model from the corpus.
+
+Requirements:
+
+- Translate toolkit (see http://translate.sourceforge.net/wiki/toolkit/index)
+- Installation of Moses (see http://www.statmt.org/moses_steps.html)
+- Bilingual data in any bilingual format supported by the Translate toolkit 
+   (see http://translate.sourceforge.net/wiki/toolkit/formats)
+
+---- do_everything.sh ----
+
+do_everything.sh calls other scripts in order to perform the
+following stages:
+
+1. Download data from server or copy from file system
+2. Segment PO data
+3. Write pocounts for data
+4. Convert data to Moses format
+5. Build a (simple) Moses model
+
+All variables must be set in variables.sh. Stages of the process
+can be bypassed by setting the switches in variables.sh.
+
+---- build_model.sh ----
+
+At the moment, a simple model is built using only bilingual data.
+Tuning the weights of the model is optional and can be set in 
+variables.sh.
+
+Options for adding dictionaries and monolignual target data etc. must
+be added.
