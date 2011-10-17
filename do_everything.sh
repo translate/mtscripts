@@ -6,6 +6,7 @@ pushd .
 
 # 0. Prepare folders for downloading data
 
+echo "Creating data folder"
 mkdir $datadir
 
 # 1. Download data from server or copy from file system

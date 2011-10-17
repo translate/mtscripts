@@ -3,13 +3,13 @@
 langtag1='zu'
 langtag2='xh'
 corpusname='corpus'
-datadir='data'
+datadir='adata'
 mosesdir='moses'
 
 server='indlovu.local'
-servpaths=('/var/samba/public/mt-work/translations/4.reviewed' '/var/samba/public/mt-work/alignment/4.reviewed')
+servpaths=('/var/samba/public/mt-work/translations/4.reviewed' '/var/samba/public/mt-work/alignment/4.reviewed') # '
 srcpaths=()
-locpath='/home/laurette/Translate_org_za/trunk/mtscripts'
+locpath='/home/laurette/Translate.org.za/trunk/mtscripts'
 segmentdir='segdata'
 filetype='po' #only one file type is assumed
 
@@ -17,14 +17,14 @@ filetype='po' #only one file type is assumed
 useserver=true
 posegment=false
 pocount=true
-mosesconvert=true
-buildmodel=true
+mosesconvert=false
+buildmodel=false
 
 #---- Building Moses model ----#
 
-mosespath='/home/laurette/Translate_org_za/Moses'
-workdir=work_5Oct
-datadir=data_5Oct
+mosespath='/home/laurette/Translate.org.za/Moses'
+bworkdir=work_5Oct
+bdatadir=data_5Oct
 corpuspath=$locpath/$mosesdir/corpus
 tunetag='tune_'
 tunecorpus=$tunetag$(echo $corpusname)

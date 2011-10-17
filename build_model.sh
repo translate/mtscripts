@@ -6,43 +6,43 @@ pushd .
 . variables.sh
 
 cd $mosespath
-echo "Removing any previous models with name "$workdir" or "$datadir"."
-rm -r $datadir
-mkdir $datadir
-mkdir $datadir/tuning
-mkdir $datadir/evaluation
-cp $corpuspath/$corpusname* $datadir
-cp $corpuspath/$tunetag$corpusname* $datadir/tuning
-cp $corpuspath/$testtag$corpusname* $datadir/evaluation
+echo "Removing any previous models with name "$bworkdir" or "$bdatadir"."
+rm -r $bdatadir
+mkdir $bdatadir
+mkdir $bdatadir/tuning
+mkdir $bdatadir/evaluation
+cp $corpuspath/$corpusname* $bdatadir
+cp $corpuspath/$tunetag$corpusname* $bdatadir/tuning
+cp $corpuspath/$testtag$corpusname* $bdatadir/evaluation
 
-rm -r $workdir
-mkdir $workdir
-mkdir $workdir/$corpusname
+rm -r $bworkdir
+mkdir $bworkdir
+mkdir $bworkdir/$corpusname
 
-$mosespath/tools/scripts/tokenizer.perl -l zu < $datadir/$corpusname.zu > $workdir/$corpusname/$corpusname.tok.zu
-$mosespath/tools/scripts/tokenizer.perl -l xh < $datadir/$corpusname.xh > $workdir/$corpusname/$corpusname.tok.xh
+$mosespath/tools/scripts/tokenizer.perl -l zu < $bdatadir/$corpusname.zu > $bworkdir/$corpusname/$corpusname.tok.zu
+$mosespath/tools/scripts/tokenizer.perl -l xh < $bdatadir/$corpusname.xh > $bworkdir/$corpusname/$corpusname.tok.xh
 
-$mosespath/tools/moses-scripts/scripts-20110627-1042/training/clean-corpus-n.perl $workdir/$corpusname/$corpusname.tok zu xh $workdir/$corpusname/$corpusname.clean 1 40
+$mosespath/tools/moses-scripts/scripts-20110627-1042/training/clean-corpus-n.perl $bworkdir/$corpusname/$corpusname.tok zu xh $bworkdir/$corpusname/$corpusname.clean 1 40
 
-mkdir $workdir/lm
-cp $workdir/$corpusname/$corpusname.tok.xh $workdir/lm/$corpusname.xh
+mkdir $bworkdir/lm
+cp $bworkdir/$corpusname/$corpusname.tok.xh $bworkdir/lm/$corpusname.xh
 #^^ This is where monolingual data should be added too
 
-$mosespath/tools/srilm/bin/i686-ubuntu/ngram-count -order 3 -interpolate -kndiscount -unk -text $workdir/lm/$corpusname.xh -lm $workdir/lm/$corpusname.lm
+$mosespath/tools/srilm/bin/i686-ubuntu/ngram-count -order 3 -interpolate -kndiscount -unk -text $bworkdir/lm/$corpusname.xh -lm $bworkdir/lm/$corpusname.lm
 
 echo 'Building model'
-nohup nice $mosespath/tools/moses-scripts/scripts-20110627-1042/training/train-model.perl -scripts-root-dir $mosespath/tools/moses-scripts/scripts-20110627-1042/ -root-dir $workdir -corpus $workdir/$corpusname/$corpusname.clean -f zu -e xh -alignment grow-diag-final-and -reordering msd-bidirectional-fe -lm 0:3:$mosespath/$workdir/lm/$corpusname.lm >& $workdir/training.out
+nohup nice $mosespath/tools/moses-scripts/scripts-20110627-1042/training/train-model.perl -scripts-root-dir $mosespath/tools/moses-scripts/scripts-20110627-1042/ -root-dir $bworkdir -corpus $bworkdir/$corpusname/$corpusname.clean -f zu -e xh -alignment grow-diag-final-and -reordering msd-bidirectional-fe -lm 0:3:$mosespath/$bworkdir/lm/$corpusname.lm >& $bworkdir/training.out
 
-mkdir $workdir/tuning
-$mosespath/tools/scripts/tokenizer.perl -l zu < $datadir/tuning/$tunetag$corpusname.zu > $workdir/tuning/$tunetag$corpusname.tok.zu
-$mosespath/tools/scripts/tokenizer.perl -l xh < $datadir/tuning/$tunetag$corpusname.xh > $workdir/tuning/$tunetag$corpusname.tok.xh
+mkdir $bworkdir/tuning
+$mosespath/tools/scripts/tokenizer.perl -l zu < $bdatadir/tuning/$tunetag$corpusname.zu > $bworkdir/tuning/$tunetag$corpusname.tok.zu
+$mosespath/tools/scripts/tokenizer.perl -l xh < $bdatadir/tuning/$tunetag$corpusname.xh > $bworkdir/tuning/$tunetag$corpusname.tok.xh
 
-mkdir $workdir/evaluation
-$mosespath/tools/scripts/tokenizer.perl -l zu < $datadir/evaluation/$testtag$corpusname.zu > $workdir/evaluation/$testtag$corpusname.tok.zu
+mkdir $bworkdir/evaluation
+$mosespath/tools/scripts/tokenizer.perl -l zu < $bdatadir/evaluation/$testtag$corpusname.zu > $bworkdir/evaluation/$testtag$corpusname.tok.zu
 
 if $tuning; then
 	echo 'Tuning model'
-	nohup nice $mosespath/tools/moses-scripts/scripts-20110627-1042/training/mert-moses.pl $workdir/tuning/$tunetag$corpusname.tok.zu $workdir/tuning/$tunetag$corpusname.tok.xh $mosespath/tools/moses/moses-cmd/src/moses $workdir/model/moses.ini --working-dir $workdir/tuning/mert --mertdir $mosespath/tools/moses/mert --rootdir $mosespath/tools/moses-scripts/scripts-20110627-1042/ --decoder-flags "-v 0" >& $workdir/tuning/mert.out
+	nohup nice $mosespath/tools/moses-scripts/scripts-20110627-1042/training/mert-moses.pl $bworkdir/tuning/$tunetag$corpusname.tok.zu $bworkdir/tuning/$tunetag$corpusname.tok.xh $mosespath/tools/moses/moses-cmd/src/moses $bworkdir/model/moses.ini --working-dir $bworkdir/tuning/mert --mertdir $mosespath/tools/moses/mert --rootdir $mosespath/tools/moses-scripts/scripts-20110627-1042/ --decoder-flags "-v 0" >& $bworkdir/tuning/mert.out
 fi
 
 popd
