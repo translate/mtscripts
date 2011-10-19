@@ -59,6 +59,8 @@ tuplist.append((re.compile('([A-Z][A-Za-z]+)\s[0-9]+(:\s*[0-9]+(-[0-9]+)*(,\s*[0
 tuplist.append((re.compile('^[^A-Za-z]*$'),'del',''))
 tuplist.append((re.compile('[(]([^)]*$)'),'sub','\g<1>')) #removes unmatched (
 tuplist.append((re.compile('^([^(]*)[)]'),'sub','\g<1>')) #removes unmatched )
+tuplist.append((re.compile('^([A-Z]+\s){1,3}[A-Z]+$'),'del','')) #removes lines of all caps with up to four words
+tuplist.append((re.compile('^([a-z]*[A-Z]+[a-z]*\s){1,3}[a-z]*[A-Z]+[a-z]*$'),'del','')) #removes name-like lines
 #tuplist.append((re.compile(),,))
 
 def isbiblename(ustr):
