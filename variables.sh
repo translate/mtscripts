@@ -7,7 +7,7 @@ datadir='adata'
 mosesdir='moses'
 
 server='indlovu.local'
-servpaths=('/var/samba/public/mt-work/translations/4.reviewed' '/var/samba/public/mt-work/alignment/4.reviewed') # '
+servpaths=('/var/samba/public/mt-work/translations/4.reviewed' '/var/samba/public/mt-work/alignment/4.reviewed')
 srcpaths=()
 locpath='/home/laurette/Translate.org.za/trunk/mtscripts'
 segmentdir='segdata'
@@ -30,6 +30,7 @@ tunetag='tune_'
 tunecorpus=$tunetag$(echo $corpusname)
 testtag='test_'
 testcorpus=$testtag$(echo $corpusname)
+installdate='20110627-1042'
 
 # Switches for building
 
