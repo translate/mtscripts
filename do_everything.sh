@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Builds corpus from bilingual files
+# Builds a Moses model from the corpus
+
 pushd .
 
 . variables.sh
