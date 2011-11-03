@@ -43,7 +43,6 @@ def spellcheck_filter(line, filters):
                     try:
                         d = enchant.Dict(f)
                         if d.check(w):
-                            print pollution, w
                             pollution = pollution + 1
                             break #increment pollution if word matches at least one filter
                     except enchant.DictNotFoundError:
@@ -55,20 +54,29 @@ def spellcheck_filter(line, filters):
             return None
     return line
 
-def fix_unit(unit, cleanup, filters):
+def segment_units(corpus):
+    from translate.tools import posegment
+    from translate.lang import factory
+    sourcelang = factory.getlanguage("en")
+    targetlang = factory.getlanguage("af")
+    seg = posegment.segment(sourcelang, targetlang)
+    return seg.convertstore(corpus)
+
+def fix_unit(u, cleanup, filters):
     if cleanup:
         if u.source:
             u.source = cleanup(u.source)
         if u.target:
             u.target = cleanup(u.target)
-        print unit
     if filters:
         u.source = spellcheck_filter(u.source, filters)
         u.target = spellcheck_filter(u.target, filters)
-    u.source = fix_punct(u.source)
-    u.target = fix_punct(u.target)
+    if u.source:
+        u.source = fix_punct(u.source.lower())
+    if u.target:
+        u.target = fix_punct(u.target.lower())
     
-    return unit
+    return u
 
 def fix_punct(ustr): #pretends that abbreviations don't exist
     global punct
@@ -79,23 +87,27 @@ def fix_punct(ustr): #pretends that abbreviations don't exist
     return None
 
 def write_units(corpusname, mono, lang1=u"", lang2=u"", enc='utf-8', units=[], outdir=None):
+    print len(units)
     if not os.path.exists(outdir):
         os.mkdir(outdir)
-    s = codecs.open(os.path.join(outdir,corpusname + u"." + lang1), 'w', enc)
-    random.shuffle(units)
+    s = codecs.open(os.path.join(outdir,corpusname + u"." + lang1), 'a', enc)
+    #random.shuffle(units)
     
     if mono:
-        sources = [str(u.source).strip() +"\n" for u in units if not u.isheader()]
-        s.writelines(sources)
+        sources = [unicode(str(u.source).strip() +"\n", enc) for u in units if not u.isheader()]
+        for l in sources:
+            s.write(l)
         s.close()
     
     else:
-        sources = [str(u.source).strip() +"\n" for u in units if u.istranslated()]
-        s.writelines(sources)
+        sources = [unicode(str(u.source).strip() +"\n", enc) for u in units if u.istranslated()]
+        for l in sources:
+            s.write(l)
         s.close()
-        t = codecs.open(os.path.join(outdir,corpusname + u"." + lang2), 'w', enc)
-        targets = [str(u.target).strip() +"\n" for u in units if u.istranslated()]
-        t.writelines(targets)
+        t = codecs.open(os.path.join(outdir,corpusname + u"." + lang2), 'a', enc)
+        targets = [unicode(str(u.target).strip() +"\n", enc) for u in units if u.istranslated()]
+        for l in targets:
+            t.write(l)
         t.close()
 
 def create_option_parser():
@@ -119,16 +131,29 @@ def create_option_parser():
         default=None
     )
     parser.add_option(
+        '-s', '--segment',
+        dest='segment',
+        help=_('Option to perform posegment on po files.'),
+        action='store_true',
+        default=False
+    )    
+    parser.add_option(
         '-n', '--corpus_name',
         dest='corpusname',
         help=_('Specify corpus name.'),
         default='corpus'
     )
     parser.add_option(
-        '-f', '--filter-lang',
+        '-l', '--lang-filter',
         dest='filters',
         nargs=4,
         help=('Specify language tags of lines to be removed. Exactly four tags must be given, use - for empty tags.'),
+        default=None
+    )
+    parser.add_option(
+        '-f', '--filenames',
+        dest='filenames',
+        help=('Specify a file containing a list of names of files to be converted.'),
         default=None
     )
     parser.add_option(
@@ -150,7 +175,9 @@ if __name__ == "__main__":
     cleanerchoice = options.cleaner #change to accommodate changes to cleaners...
     filters = options.filters
     mono = options.mono
-    
+    filenames = options.filenames
+    segment = options.segment
+
     import cleaner
     import daccleaner
     import webcleaner
@@ -160,11 +187,48 @@ if __name__ == "__main__":
                 "daccleaner":daccleaner.DACCleaner(),
                 "webcleaner":webcleaner.WebCleaner()
                }
+
+    if cleanerchoice:
+        cleaner = cleaners[cleanerchoice]
+        cleanup = cleaner.cleanup
+    else:
+        cleanup = None
     
-    cleaner = cleaners[cleanerchoice]
-    print cleaner
-    
+    #remove previous contents of corpus
     if len(args) >= 2:
+        try:
+            s = codecs.open(os.path.join(outdir,corpusname + u"." + args[0]), 'w', 'utf-8')
+            s.close()
+        except IOError:
+            print "No file",corpusname+"."+args[0],"to be removed"
+        try:
+            t = codecs.open(os.path.join(outdir,corpusname + u"." + args[1]), 'w', 'utf-8')
+            t.close()
+        except IOError:
+            print "No file",corpusname+"."+args[1],"to be removed"
+    
+    #if filesnames are to be read from a file
+    if len(args) == 2:
+        lang1 = args[0]
+        lang2 = args[1]
+        if filenames:
+            n = codecs.open(filenames,'r','utf-8')
+            lines = n.readlines()
+            for l in lines:
+                try:
+		    corpus = factory.getobject(l[:-1])
+                    print l,": ",len(corpus.units)
+		    if segment:
+                        corpus = segment_units(corpus)    
+                    for u in corpus.units:
+                        fix_unit(u, cleanup, filters)
+                    write_units(corpusname, mono, lang1, lang2, 'utf-8', corpus.units, outdir)
+                except ValueError, e:
+                    print e,"Could not convert "+l+" to factory."
+                    continue
+    
+    #if filenames are given as paramaters
+    elif len(args) >= 2:
         lang1 = args[0]
         lang2 = args[1]
         files = []
@@ -176,6 +240,18 @@ if __name__ == "__main__":
                             files.append(os.path.join(f, fn))
                 else:
                     files.append(f)
+        for f in files:
+            try:
+                corpus = factory.getobject(f)
+                print f,": ",corpus.units
+		if segment:
+                    units = segment_units(corpus)
+                for u in corpus.units:
+                    fix_unit(u, cleanup, filters)
+                write_units(corpusname, mono, lang1, lang2, 'utf-8', corpus.units, outdir)
+            except ValueError:
+                print "Could not convert "+f+" to factory."
+                continue
 
         if not files:
             print 'No input files specified.'
@@ -184,23 +260,3 @@ if __name__ == "__main__":
     else:
         print "Usage: %prog [<options>] <language 1> <language 2> <bilingual files>"
         exit()
-    
-    #get all units
-    units = []
-    for f in files:
-        try:
-            corpus = factory.getobject(f)
-        except ValueError:
-            print "Could not convert to factory."
-            continue
-        units.extend(corpus.units)
-    
-    cleanup = cleaner.cleanup
-    
-    print len(units), "units"
-    for u in units:
-        fix_unit(u, cleanup, filters)
-    
-    import locale
-    enc = locale.getpreferredencoding()
-    write_units(corpusname, mono, lang1, lang2, enc, units, outdir)
