@@ -3,7 +3,7 @@
 langtag1='zu'
 langtag2='xh'
 corpusname='corpus'
-datadir='adata'
+datadir='data'
 mosesdir='moses'
 
 server='indlovu.local'
@@ -22,10 +22,12 @@ buildmodel=false
 
 #---- Building Moses model ----#
 
-mosespath='/home/laurette/Translate.org.za/Moses'
+mosespath='/home/laurette/Translate.org.za/Moses' #directory containing tools/ (as explained in the online step-by-step guide)
+system='i686-m64'
+order=3 #length of ngrams
 bworkdir=work_5Oct
 bdatadir=data_5Oct
-corpuspath=$locpath/$mosesdir/corpus
+corpuspath=$locpath/$mosesdir/corpus #the location from which to get the data and throw into bdatadir
 tunetag='tune_'
 tunecorpus=$tunetag$(echo $corpusname)
 testtag='test_'
@@ -34,4 +36,6 @@ installdate='20110627-1042'
 
 # Switches for building
 
+getdata=false
+testing=false
 tuning=true
