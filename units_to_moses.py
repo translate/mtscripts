@@ -120,9 +120,9 @@ def convert_store(file, cleanup, filters, lang1, lang2):
         store = factory.getobject(file)
         if segment:
             store = segment_units(store,lang1,lang2)
-            for u in store.units:
+        for u in store.units:
                 fix_unit(u, cleanup, filters)
-    return store
+        return store
     except ValueError, e:
         print _("%s; Could not convert %s to factory.") % (e,f)
 
@@ -227,7 +227,7 @@ if __name__ == "__main__":
     # get language codes
     if mono:
         if len(args) >= 1:
-        lang1 = args[0]
+            lang1 = args[0]
             lang2 = lang1
         else:
             print parser.usage
