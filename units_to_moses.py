@@ -28,7 +28,7 @@ import re
 import random
 import codecs
 
-POLLUTION_THRESHOLD = 0.25
+POLLUTION_THRESHOLD = 0.25 # percentage: foreign words / words in the string
 
 #TODO: decide what to do with single quotes, since they sometimes appear as part of a word
 # fixes punctuation spacing for moses
