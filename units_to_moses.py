@@ -198,7 +198,8 @@ def create_option_parser():
     return parser
 
 if __name__ == "__main__":
-    options, args = create_option_parser().parse_args()
+    parser = create_option_parser()
+    options, args = parser.parse_args()
 
     corpusname = options.corpusname
     outdir = options.outputdir
@@ -230,14 +231,14 @@ if __name__ == "__main__":
             lang1 = args[0]
             lang2 = lang1
         else:
-            print parser.usage
+            print parser.print_usage()
         exit(1)
     else:
         if len(args) >= 2:
             lang1 = args[0]
             lang2 = args[1]
         else:
-            print parser.usage
+            print parser.print_usage()
             exit(1)
 
     # clear files to be written from existing content
@@ -269,7 +270,7 @@ if __name__ == "__main__":
             exit(1)
 
     else:
-        print parser.usage
+        print parser.print_usage()
         exit()
 
     # convert and write
