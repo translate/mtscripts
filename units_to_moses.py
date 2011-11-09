@@ -124,7 +124,7 @@ def convert_store(file, cleanup, filters, lang1, lang2):
                 fix_unit(u, cleanup, filters)
         return store
     except ValueError, e:
-        print _("%s; Could not convert %s to factory.") % (e,f)
+        print _("%s; Could not convert %s to factory.") % (e,file)
 
 def clear_previous(outdir, lang1, lang2):
     file_lang1 = os.path.join(outdir,corpusname + u"." + lang1)
@@ -275,5 +275,6 @@ if __name__ == "__main__":
 
     # convert and write
     for file in files:
-        store = convert(file, cleanup, filters, lang1, lang2)
-        write_units(corpusname, mono, lang1, lang2, 'utf-8', store.units, outdir)
+        store = convert_store(file, cleanup, filters, lang1, lang2)
+        if store:
+            write_units(corpusname, mono, lang1, lang2, 'utf-8', store.units, outdir)
