@@ -30,7 +30,7 @@ import codecs
 
 POLLUTION_THRESHOLD = 0.25
 
-#TODO: decide what to do with single quotes, since they sometimes appear as part of a word   
+#TODO: decide what to do with single quotes, since they sometimes appear as part of a word
 # fixes punctuation spacing for moses
 # removes pipes
 # lowercases
@@ -40,7 +40,7 @@ spaces = re.compile('\s+') #finds successive whitespace in order to replace it w
 
 def spellcheck_filter(line, filters):
     if line:
-        import enchant        
+        import enchant
         words = line.split()
         pollution = 0.0
         for w in words:
@@ -81,7 +81,7 @@ def fix_unit(u, cleanup, filters):
         u.source = fix_for_moses(u.source)
     if u.target:
         u.target = fix_for_moses(u.target)
-    
+
     return u
 
 def fix_for_moses(ustr): #pretends that abbreviations don't exist
@@ -97,13 +97,13 @@ def write_units(corpusname, mono, lang1=u"", lang2=u"", enc='utf-8', units=[], o
         os.mkdir(outdir)
     s = codecs.open(os.path.join(outdir,corpusname + u"." + lang1), 'a', enc)
     #random.shuffle(units)
-   
+
     if mono:
         sources = [unicode(str(u.source).strip() +"\n", enc) for u in units if not u.isheader()]
         for l in sources:
             s.write(l)
         s.close()
-    
+
     else:
         sources = [unicode(str(u.source).strip() +"\n", enc) for u in units if u.istranslated()]
         for l in sources:
@@ -119,7 +119,7 @@ def convert_store(file, cleanup, filters, lang1, lang2):
     try:
         store = factory.getobject(file)
         if segment:
-            store = segment_units(store,lang1,lang2)    
+            store = segment_units(store,lang1,lang2)
             for u in store.units:
                 fix_unit(u, cleanup, filters)
     return store
@@ -194,12 +194,12 @@ def create_option_parser():
         help=_('Option to perform posegment on po files.'),
         action='store_true',
         default=False
-    )    
+    )
     return parser
 
 if __name__ == "__main__":
     options, args = create_option_parser().parse_args()
-    
+
     corpusname = options.corpusname
     outdir = options.outputdir
     cleanerchoice = options.cleaner #change to accommodate changes to cleaners...
@@ -213,7 +213,7 @@ if __name__ == "__main__":
         import cleaner
         import daccleaner
         import webcleaner
-    
+
         cleaners = {
                 "cleaner":cleaner.Cleaner(),
                 "daccleaner":daccleaner.DACCleaner(),
@@ -223,7 +223,7 @@ if __name__ == "__main__":
         cleanup = cleaner.cleanup
     else:
         cleanup = None
-    
+
     # get language codes
     if mono:
         if len(args) >= 1:
@@ -267,7 +267,7 @@ if __name__ == "__main__":
         if len(files) == 0:
             print 'No input files specified.'
             exit(1)
-        
+
     else:
         print parser.usage
         exit()
