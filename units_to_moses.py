@@ -102,7 +102,7 @@ def write_units(corpusname, mono, lang1=u"", lang2=u"", enc='utf-8', units=[], o
         for u in units:
             if not u.istranslated():
                 continue
-            s.write(u.source.strip() + "\n")
+            s.write(u.source + "\n")
         s.close()
 
     else:
@@ -110,8 +110,8 @@ def write_units(corpusname, mono, lang1=u"", lang2=u"", enc='utf-8', units=[], o
         for u in units:
             if not u.istranslated():
                 continue
-            s.write(u.source.strip() + "\n")
-            t.write(u.target.strip() + "\n")
+            s.write(u.source + "\n")
+            t.write(u.target + "\n")
 
         s.close()
         t.close()
