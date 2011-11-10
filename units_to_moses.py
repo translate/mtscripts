@@ -99,20 +99,21 @@ def write_units(corpusname, mono, lang1=u"", lang2=u"", enc='utf-8', units=[], o
     #random.shuffle(units)
 
     if mono:
-        sources = [unicode(str(u.source).strip() +"\n", enc) for u in units if not u.isheader()]
-        for l in sources:
-            s.write(l)
+        for u in units:
+            if not u.istranslated():
+                continue
+            s.write(u.source.strip() + "\n")
         s.close()
 
     else:
-        sources = [unicode(str(u.source).strip() +"\n", enc) for u in units if u.istranslated()]
-        for l in sources:
-            s.write(l)
-        s.close()
         t = codecs.open(os.path.join(outdir,corpusname + u"." + lang2), 'a', enc)
-        targets = [unicode(str(u.target).strip() +"\n", enc) for u in units if u.istranslated()]
-        for l in targets:
-            t.write(l)
+        for u in units:
+            if not u.istranslated():
+                continue
+            s.write(u.source.strip() + "\n")
+            t.write(u.target.strip() + "\n")
+
+        s.close()
         t.close()
 
 def convert_store(file, cleanup, filters, lang1, lang2):
